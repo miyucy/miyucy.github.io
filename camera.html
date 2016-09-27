@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="https://webrtc.github.io/adapter/adapter-latest.js"></script>
+    <style>
+     #roll { display: flex; padding-left: 0; list-style: none; }
+     #roll li { flex: 1 1 auto; }
+     #roll img { display: block;  max-width: 100%; height: auto; }
+    </style>
+  </head>
+  <body>
+    <div>
+      <div>
+        <div style="text-align: center;">
+          <video id="camera" autoplay="autoplay"></video>
+        </div>
+        <div style="width: 100%">
+          <ul id="roll" style="display: flex;"></ul>
+        </div>
+      </div>
+
+      <div style="display: none;">
+        <canvas id="canvas"></canvas>
+        <a id="anchor" target="_blank"></a>
+      </div>
+    </div>
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        var video = document.getElementById("camera");
+        var canvas = document.getElementById("canvas");
+        var anchor = document.getElementById("anchor");
+        var roll = document.getElementById("roll");
+        var dataURLs = [];
+
+        function download(dataURL) {
+          anchor.href = dataURL;
+          anchor.download = "" + +(new Date()) + ".jpg";
+          anchor.click();
+        };
+
+        function append(dataURL) {
+          dataURLs.push(dataURL);
+          if (dataURLs.length > 5) {
+            dataURLs.shift();
+          }
+          refresh();
+        }
+
+        function refresh() {
+          var i, n;
+          var children = dataURLs.map(function (dataURL) {
+            var li = document.createElement("li");
+            var img = document.createElement("img");
+            img.src = dataURL;
+            li.appendChild(img);
+            li.addEventListener("click", function (evt) {
+              evt.preventDefault();
+              download(dataURL);
+            });
+            return li;
+          });
+
+          n = roll.children.length;
+          for (i = 0; i < n; i++) {
+            roll.removeChild(roll.children[0]);
+          }
+          n = children.length;
+          for (i = 0; i < n; i++) {
+            roll.appendChild(children[i]);
+          }
+        }
+
+        navigator.getUserMedia({ video: true, audio: false }, function (mediaStream) {
+          video.src = window.URL.createObjectURL(mediaStream);
+          video.play();
+          video.addEventListener("click", function (evt) {
+            evt.preventDefault();
+            var videoWidth = video.videoWidth;
+            var videoHeight = video.videoHeight;
+            canvas.width = videoWidth;
+            canvas.height = videoHeight;
+            canvas.getContext("2d").drawImage(video, 0, 0, videoWidth, videoHeight, 0, 0, videoWidth, videoHeight);
+            append(canvas.toDataURL("image/jpeg"));
+          });
+        }, console.error);
+      });
+    </script>
+  </body>
+</html>
