@@ -3,26 +3,25 @@
   <head>
     <meta charset="utf-8">
     <meta http-equiv="x-ua-compatible" content="ie=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, user-scalable=yes, initial-scale=1, maximum-scale=1">
     <script src="https://webrtc.github.io/adapter/adapter-latest.js"></script>
     <style>
-     #roll { display: flex; padding-left: 0; list-style: none; }
+     #camera { display: block; margin: auto; }
+     #roll { display: flex; flex-direction: row-reverse; padding-left: 0; list-style: none; }
      #roll li { flex: 1 1 auto; }
      #roll img { display: block;  max-width: 100%; height: auto; }
+     .hidden { display: none; }
     </style>
   </head>
   <body>
     <div>
       <div>
-        <div style="text-align: center;">
-          <video id="camera" autoplay="autoplay"></video>
-        </div>
-        <div style="width: 100%">
-          <ul id="roll" style="display: flex;"></ul>
-        </div>
+        <video id="camera" autoplay="autoplay"></video>
+        <select id="selector" class="hidden"></select>
+        <ul id="roll"></ul>
       </div>
 
-      <div style="display: none;">
+      <div class="hidden">
         <canvas id="canvas"></canvas>
         <a id="anchor" target="_blank"></a>
       </div>
@@ -33,7 +32,9 @@
         var canvas = document.getElementById("canvas");
         var anchor = document.getElementById("anchor");
         var roll = document.getElementById("roll");
+        var selector = document.getElementById("selector");
         var dataURLs = [];
+        var deviceIds = [];
 
         function download(dataURL) {
           anchor.href = dataURL;
@@ -63,29 +64,53 @@
             return li;
           });
 
-          n = roll.children.length;
-          for (i = 0; i < n; i++) {
-            roll.removeChild(roll.children[0]);
+          while (roll.firstChild) {
+            roll.removeChild(roll.firstChild);
           }
+
           n = children.length;
           for (i = 0; i < n; i++) {
             roll.appendChild(children[i]);
           }
         }
 
-        navigator.getUserMedia({ video: true, audio: false }, function (mediaStream) {
-          video.src = window.URL.createObjectURL(mediaStream);
-          video.play();
-          video.addEventListener("click", function (evt) {
-            evt.preventDefault();
-            var videoWidth = video.videoWidth;
-            var videoHeight = video.videoHeight;
-            canvas.width = videoWidth;
-            canvas.height = videoHeight;
-            canvas.getContext("2d").drawImage(video, 0, 0, videoWidth, videoHeight, 0, 0, videoWidth, videoHeight);
-            append(canvas.toDataURL("image/jpeg"));
+        video.addEventListener("click", function (evt) {
+          evt.preventDefault();
+          var videoWidth = video.videoWidth;
+          var videoHeight = video.videoHeight;
+          canvas.width = videoWidth;
+          canvas.height = videoHeight;
+          canvas.getContext("2d").drawImage(video, 0, 0, videoWidth, videoHeight, 0, 0, videoWidth, videoHeight);
+          append(canvas.toDataURL("image/jpeg"));
+        });
+
+        selector.addEventListener("change", function (evt) {
+          navigator.getUserMedia({ video: { deviceId: { exact: selector.value } }, audio: false }, function (mediaStream) {
+            video.pause();
+            video.src = window.URL.createObjectURL(mediaStream);
+            video.play();
+          }, console.error);
+        });
+
+        navigator.mediaDevices.enumerateDevices().then(function (devices) {
+          devices.filter(function (device) {
+            return device.kind === 'videoinput';
+          }).forEach(function (device) {
+            var option = document.createElement('option');
+            option.value = device.deviceId;
+            option.text = device.label;
+            selector.appendChild(option);
           });
-        }, console.error);
+          if (selector.firstChild) {
+            selector.firstChild.selected = true;
+            selector.dispatchEvent(new Event('change'));
+          }
+          if (selector.children.length > 1) {
+            selector.classList.remove('hidden');
+          } else {
+            selector.classList.add('hidden');
+          }
+        }).catch(console.error);
       });
     </script>
   </body>
