@@ -39,6 +39,12 @@
         var curMediaStreamURL = null;
         var curMediaStream = null;
 
+        function removeChildren(node) {
+          while (node.firstChild) {
+            node.removeChild(node.firstChild);
+          }
+        }
+
         function download(dataURL) {
           anchor.href = dataURL;
           anchor.download = "" + +(new Date()) + ".jpg";
@@ -67,9 +73,7 @@
             return li;
           });
 
-          while (roll.firstChild) {
-            roll.removeChild(roll.firstChild);
-          }
+          removeChildren(roll);
 
           n = children.length;
           for (i = 0; i < n; i++) {
@@ -101,6 +105,34 @@
           return curMediaStreamURL;
         }
 
+        function enumerateDevices() {
+          navigator.mediaDevices.enumerateDevices().then(function (devices) {
+            removeChildren(selector);
+
+            devices.filter(function (device) {
+              return device.kind === 'videoinput';
+            }).forEach(function (device) {
+              var option = document.createElement('option');
+              option.value = device.deviceId;
+              option.text = device.label;
+              selector.appendChild(option);
+            });
+
+            if (selector.firstChild) {
+              selector.firstChild.selected = true;
+              selector.dispatchEvent(new Event('change'));
+            } else {
+              destroy();
+            }
+
+            if (selector.children.length > 1) {
+              selector.classList.remove('hidden');
+            } else {
+              selector.classList.add('hidden');
+            }
+          }).catch(console.error);
+        }
+
         video.addEventListener("click", function (evt) {
           evt.preventDefault();
           var videoWidth = video.videoWidth;
@@ -118,27 +150,8 @@
           }, console.error);
         });
 
-        navigator.mediaDevices.enumerateDevices().then(function (devices) {
-          devices.filter(function (device) {
-            return device.kind === 'videoinput';
-          }).forEach(function (device) {
-            var option = document.createElement('option');
-            option.value = device.deviceId;
-            option.text = device.label;
-            selector.appendChild(option);
-          });
-
-          if (selector.firstChild) {
-            selector.firstChild.selected = true;
-            selector.dispatchEvent(new Event('change'));
-          }
-
-          if (selector.children.length > 1) {
-            selector.classList.remove('hidden');
-          } else {
-            selector.classList.add('hidden');
-          }
-        }).catch(console.error);
+        navigator.mediaDevices.addEventListener("devicechange", enumerateDevices);
+        enumerateDevices();
       });
     </script>
   </body>
