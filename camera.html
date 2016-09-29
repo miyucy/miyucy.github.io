@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, user-scalable=yes, initial-scale=1, maximum-scale=1">
     <script src="https://webrtc.github.io/adapter/adapter-latest.js"></script>
     <style>
-     #camera { display: block; margin: auto; }
+     #camera { display: block; margin: auto; max-width: 100%; }
      #roll { display: flex; flex-direction: row-reverse; padding-left: 0; list-style: none; }
      #roll li { flex: 1 1 auto; }
      #roll img { display: block;  max-width: 100%; height: auto; }
@@ -35,6 +35,8 @@
         var selector = document.getElementById("selector");
         var dataURLs = [];
         var deviceIds = [];
+        var curMediaStreamURL = null;
+        var curMediaStream = null;
 
         function download(dataURL) {
           anchor.href = dataURL;
@@ -74,6 +76,30 @@
           }
         }
 
+        function destroy() {
+          if (curMediaStreamURL) {
+            window.URL.revokeObjectURL(curMediaStreamURL);
+            curMediaStreamURL = null;
+          }
+
+          if (curMediaStream) {
+            (function (tracks) {
+              for (var i=0, n=tracks.length; i<n; i++) {
+                var track = tracks[i];
+                track.stop();
+              }
+            })(curMediaStream.getTracks());
+            curMediaStream = null;
+          }
+        }
+
+        function create(mediaStream) {
+          destroy();
+          curMediaStream = mediaStream;
+          curMediaStreamURL = window.URL.createObjectURL(curMediaStream);
+          return curMediaStreamURL;
+        }
+
         video.addEventListener("click", function (evt) {
           evt.preventDefault();
           var videoWidth = video.videoWidth;
@@ -86,8 +112,7 @@
 
         selector.addEventListener("change", function (evt) {
           navigator.getUserMedia({ video: { deviceId: { exact: selector.value } }, audio: false }, function (mediaStream) {
-            video.pause();
-            video.src = window.URL.createObjectURL(mediaStream);
+            video.src = create(mediaStream);
             video.play();
           }, console.error);
         });
@@ -101,10 +126,12 @@
             option.text = device.label;
             selector.appendChild(option);
           });
+
           if (selector.firstChild) {
             selector.firstChild.selected = true;
             selector.dispatchEvent(new Event('change'));
           }
+
           if (selector.children.length > 1) {
             selector.classList.remove('hidden');
           } else {
