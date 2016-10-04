@@ -33,6 +33,9 @@ document.addEventListener('DOMContentLoaded', function () {
                 console.log('subscription.keys.p256dh = ' + subscription.getKey('p256dh'));
                 console.log('subscription.keys.auth = ' + subscription.getKey('auth'));
                 console.log(subscription.toJSON());
+
+                var pre = document.getElementById('subscription');
+                pre.textContent = JSON.stringify(subscription, null, '  ');
               });
             }
           });
