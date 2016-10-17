@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+  </head>
+  <body>
+    <input id="txt" type="text" autofocus/>
+    <pre id="log"></pre>
+    <script>
+      document.addEventListener('DOMContentLoaded', function () {
+        var txt = document.getElementById('txt');
+        var log = document.getElementById('log');
+        txt.addEventListener('input', function (evt) {
+          log.textContent = '' + evt.currentTarget.value + "\n" + log.textContent;
+        });
+      });
+    </script>
+  </body>
+</html>
