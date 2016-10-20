@@ -6,18 +6,13 @@ document.addEventListener('DOMContentLoaded', function () {
   peer.on('open', function (peerId) {
     var node = document.getElementById('localpeerid');
     node.textContent = peerId;
-
-    navigator.mediaDevices.getUserMedia({ video: true, audio: true }).then(function (localMediaStream) {
-      updateTracks(localMediaStream, flags);
-      updateButtons(flags);
-      copyTracks(localMediaStream, mediaStream);
-      play(document.getElementById('localvideo'), mediaStream);
-    }).catch(console.error);
   });
 
   peer.on('call', function (mediaConnection) {
     mediaConnection.on('error', console.error);
     mediaConnection.on('stream', function (mediaStream) {
+      mediaStream.addEventListener('addtrack', console.log);
+      mediaStream.addEventListener('removetrack', console.log);
       play(document.getElementById('remotevideo'), mediaStream);
     });
 
@@ -35,52 +30,109 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   });
 
-  document.getElementById('video').addEventListener('click', function (evt) {
-    flags.video = !flags.video;
+  document.getElementById('video').addEventListener('change', getUserMedia);
+  document.getElementById('enablevideo').addEventListener('change', function (evt) {
+    flags.video = evt.currentTarget.checked;
     updateTracks(mediaStream, flags);
-    updateButtons(flags);
   });
 
-  document.getElementById('audio').addEventListener('click', function (evt) {
-    flags.audio = !flags.audio;
+  document.getElementById('audio').addEventListener('change', getUserMedia);
+  document.getElementById('enableaudio').addEventListener('change', function (evt) {
+    flags.audio = evt.currentTarget.checked;
     updateTracks(mediaStream, flags);
-    updateButtons(flags);
   });
-});
 
-function updateButtons(flags) {
-  document.getElementById('video').textContent = 'video ' + (flags.video ? 'off' : 'on');
-  document.getElementById('audio').textContent = 'audio ' + (flags.audio ? 'off' : 'on');
-}
+  navigator.mediaDevices.addEventListener('devicechange', enumerateDevices);
+  enumerateDevices();
+  getUserMedia();
 
-function updateTracks(mediaStream, flags) {
-  for (var track of mediaStream.getVideoTracks()) {
-    track.enabled = flags.video;
+  function getUserMedia() {
+    navigator.mediaDevices.getUserMedia(getConstraints()).then(function (localMediaStream) {
+      updateTracks(localMediaStream, flags);
+      copyTracks(localMediaStream, mediaStream);
+      play(document.getElementById('localvideo'), mediaStream);
+    });
   }
 
-  for (var track of mediaStream.getAudioTracks()) {
-    track.enabled = flags.audio;
+  function getConstraints() {
+    var constraints = { video: true, audio: true };
+
+    var video = document.getElementById('video');
+    if (video.value && video.value.length > 0) {
+      constraints.video = { deviceId: { exact: video.value } };
+    }
+
+    var audio = document.getElementById('audio');
+    if (audio.value && audio.value.length > 0) {
+      constraints.audio = { deviceId: { exact: audio.value } };
+    }
+
+    return constraints;
   }
-}
 
-function copyTracks(src, dest) {
-  for (var track of dest.getTracks()) {
-    dest.removeTrack(track);
+  function enumerateDevices() {
+    navigator.mediaDevices.enumerateDevices().then(function (devices) {
+
+      var video = document.getElementById('video');
+      removeChildren(video);
+      devices.filter(function (device) {
+        return device.kind === 'videoinput';
+      }).forEach(function (device) {
+        var option = document.createElement('option');
+        option.value = device.deviceId;
+        option.text = device.label;
+        video.appendChild(option);
+      });
+
+      var audio = document.getElementById('audio');
+      removeChildren(audio);
+      devices.filter(function (device) {
+        return device.kind === 'audioinput';
+      }).forEach(function (device) {
+        var option = document.createElement('option');
+        option.value = device.deviceId;
+        option.text = device.label;
+        audio.appendChild(option);
+      });
+
+    }).catch(console.error);
   }
 
-  for (var track of src.getTracks()) {
-    dest.addTrack(track);
+  function updateTracks(mediaStream, flags) {
+    for (var track of mediaStream.getVideoTracks()) {
+      track.enabled = flags.video;
+    }
+
+    for (var track of mediaStream.getAudioTracks()) {
+      track.enabled = flags.audio;
+    }
   }
-}
 
-function play(node, mediaStream) {
-  node.srcObject = mediaStream;
-  node.play();
+  function copyTracks(src, dest) {
+    for (var track of dest.getTracks()) {
+      dest.removeTrack(track);
+    }
 
-  var callback = function () {
+    for (var track of src.getTracks()) {
+      dest.addTrack(track);
+    }
+  }
+
+  function play(node, mediaStream) {
+    node.srcObject = mediaStream;
     node.play();
-    node.removeEventListener('loadedmetadata', callback);
-  };
 
-  node.addEventListener('loadedmetadata', callback, false);
-}
+    var callback = function () {
+      node.play();
+      node.removeEventListener('loadedmetadata', callback);
+    };
+
+    node.addEventListener('loadedmetadata', callback, false);
+  }
+
+  function removeChildren(node) {
+    while (node.firstChild) {
+      node.removeChild(node.firstChild);
+    }
+  }
+});
