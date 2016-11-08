@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="https://skyway.io/dist/0.3/peer.js"></script>
+    <script src="https://webrtc.github.io/adapter/adapter-latest.js"></script>
+    <script src="/skyway-dc.js"></script>
+  </head>
+  <body>
+    <div>
+      Local Peer ID : <span id="localpeerid" />
+    </div>
+    <form id="call">
+      <input name="remotepeerid" required="required" pattern="^.+$" placeholder="Remote Peer ID" type="text" />
+      <button type="submit">Call</button>
+    </form>
+    <div style="display: flex;">
+      <div style="flex: 0 0 50%">
+        <h1>local</h1>
+        <video id="localvideo" autoplay="autoplay"></video>
+      </div>
+      <div style="flex: 0 0 50%">
+        <h1>remote</h1>
+        <img id="remotevideo" />
+      </div>
+    </div>
+  </body>
+</html>
