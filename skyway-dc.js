@@ -43,6 +43,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
   elmQuality.addEventListener('change', function (evt) {
     quality = +evt.currentTarget.value / 100.0;
+    quality = Math.min(Math.max(quality, 0.01), 1);
   });
 
   document.getElementById('call').addEventListener('submit', function (evt) {
