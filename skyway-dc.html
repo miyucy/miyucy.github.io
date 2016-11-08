@@ -12,6 +12,19 @@
     <div>
       Local Peer ID : <span id="localpeerid" />
     </div>
+    <div>
+      <label>
+        Quality <input id="quality" type="range" max="100" min="1" value="50" />
+      </label>
+
+      <label>
+        <input id="use" type="checkbox" checked="checked"/> Use FPS
+      </label>
+
+      <label>
+        <input id="fps" type="number" max="60" min="1" value="10" />
+      </label>
+    </div>
     <form id="call">
       <input name="remotepeerid" required="required" pattern="^.+$" placeholder="Remote Peer ID" type="text" />
       <button type="submit">Call</button>

@@ -4,12 +4,19 @@ document.addEventListener('DOMContentLoaded', function () {
   var localCanvas = document.createElement('canvas');
   var elmLocalVideo = document.getElementById('localvideo');
   var elmRemoteVideo = document.getElementById('remotevideo');
+  var elmUseFPS = document.getElementById('use');
+  var elmFPS = document.getElementById('fps');
+  var elmQuality = document.getElementById('quality');
   var localMediaBuffer = [];
   var senderId = null;
   var rendererId = null;
   var receiveBuffers = {};
   var remoteMediaBuffer = [];
+  var useFPS = true;
+  var FPS = 10;
+  var quality = 0.5;
   var CHUNK_SIZE = 512;
+  var LOCAL_BUFFER_SIZE = 30;
 
   peer.on('open', function (peerId) {
     var node = document.getElementById('localpeerid');
@@ -18,6 +25,24 @@ document.addEventListener('DOMContentLoaded', function () {
 
   peer.on('connection', function (dataConnection) {
     foo(dataConnection);
+  });
+
+  elmUseFPS.addEventListener('change', function (evt) {
+    if (evt.currentTarget.checked) {
+      elmFPS.disabled = false;
+      useFPS = true;
+    } else {
+      elmFPS.disabled = true;
+      useFPS = false;
+    }
+  });
+
+  elmFPS.addEventListener('change', function (evt) {
+    FPS = +evt.currentTarget.value;
+  });
+
+  elmQuality.addEventListener('change', function (evt) {
+    quality = +evt.currentTarget.value / 100.0;
   });
 
   document.getElementById('call').addEventListener('submit', function (evt) {
@@ -33,7 +58,12 @@ document.addEventListener('DOMContentLoaded', function () {
   });
 
   function capture() {
-    requestAnimationFrame(capture);
+    if (useFPS) {
+      setTimeout(capture, 1000.0 / FPS);
+    } else {
+      requestAnimationFrame(capture);
+    }
+
     shot();
   }
 
@@ -45,8 +75,8 @@ document.addEventListener('DOMContentLoaded', function () {
     localCanvas.getContext('2d').drawImage(elmLocalVideo,
                                            0, 0, videoWidth, videoHeight,
                                            0, 0, videoWidth, videoHeight);
-    localMediaBuffer.push(localCanvas.toDataURL('image/jpeg', 0.4));
-    if (localMediaBuffer.length > 30) {
+    localMediaBuffer.push(localCanvas.toDataURL('image/jpeg', quality));
+    if (localMediaBuffer.length > LOCAL_BUFFER_SIZE) {
       localMediaBuffer.shift();
     }
   }
@@ -107,6 +137,7 @@ document.addEventListener('DOMContentLoaded', function () {
       if (data.i + 1 === data.n) {
         remoteMediaBuffer.push(receiveBuffers[t].join(''));
         receiveBuffers[t] = undefined;
+        delete receiveBuffers[t];
       }
     });
 
