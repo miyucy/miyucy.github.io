@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, user-scalable=yes, initial-scale=1, maximum-scale=1">
+    <titie></titie>
+    <script>
+      (function () {
+        function readFile(file, img) {
+          var reader = new FileReader();
+          reader.onerror = function () {
+          }
+          reader.onabort = function () {
+          }
+          reader.onload = function () {
+            img.src = reader.result;
+          }
+          reader.readAsDataURL(file);
+        }
+
+        function toDataURL(img) {
+          var canvas = document.createElement('canvas');
+          canvas.width = img.width;
+          canvas.height = img.height;
+          var context = canvas.getContext('2d');
+          context.drawImage(img, 0, 0, img.width, img.height, 0, 0, img.width, img.height);
+          return canvas.toDataURL('image/jpeg');
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+          var fileElm = document.getElementById('file');
+          var linkElm = document.getElementById('link');
+          var imgElm = document.getElementById('img');
+
+          imgElm.addEventListener('load', function (evt) {
+            var dataURL = toDataURL(evt.currentTarget);
+            atob(dataURL.split(',')[1]);
+          })
+
+          fileElm.addEventListener('change', function (evt) {
+            var files = evt.currentTarget.files;
+            var i;
+            for (i = 0; i < files.length; i++) {
+              var file = files.item(i);
+              if (file && file.type.match(/^image\//)) {
+                readFile(file, imgElm);
+                break;
+              }
+            }
+          }, false);
+        }, false);
+      })();
+    </script>
+  </head>
+  <body>
+    <input id="file" type="file" /> <img id="img" style="display:none"; >
+    <a id="link">Download</a>
+  </body>
+</html>
