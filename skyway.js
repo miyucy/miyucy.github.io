@@ -84,21 +84,31 @@ function play(node, mediaStream) {
   node.addEventListener("loadedmetadata", callback);
 }
 
+function startStats(mediaConnection) {
+  console.log(mediaConnection);
+  return setInterval(() => {
+    var peerConnection = mediaConnection._negotiator._pc;
+    peerConnection
+      .getStats()
+      .then(stats => Array.from(stats.entries()).reduce((result, entry) => ((result[entry[0]] = entry[1]), result), {}))
+      .then(stats => {
+        console.log((new Date()), JSON.stringify(stats));
+      });
+  }, 1000);
+}
+
+function cancelStats(mediaConnection, timer) {
+  console.log(mediaConnection);
+  clearInterval(timer);
+}
+
 function prepareMediaConnectionEventHandler(mediaConnection) {
+  var timer = startStats(mediaConnection);
+  mediaConnection.on("close", cancelStats.bind(null, mediaConnection, timer));
   mediaConnection.on("error", console.error);
   mediaConnection.on("stream", mediaStream => {
     play(document.getElementById("remotevideo"), mediaStream);
   });
-  console.log(mediaConnection);
-  var peerConnection = mediaConnection._negotiator._pc;
-  setInterval(() => {
-    peerConnection.getStats().then(stats => {
-      console.log(JSON.stringify(Array.from(stats.entries())));
-      // stats.forEach(entry => {
-      //   console.log(entry);
-      // });
-    });
-  }, 1000);
 }
 
 document.addEventListener("DOMContentLoaded", () => {
