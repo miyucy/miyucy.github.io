@@ -81,28 +81,15 @@
           }
         }
 
-        function destroy() {
-          if (curMediaStreamURL) {
-            window.URL.revokeObjectURL(curMediaStreamURL);
-            curMediaStreamURL = null;
-          }
-
-          if (curMediaStream) {
+        function destroy(mediaStream) {
+          if (mediaStream) {
             (function (tracks) {
               for (var i=0, n=tracks.length; i<n; i++) {
                 var track = tracks[i];
                 track.stop();
               }
-            })(curMediaStream.getTracks());
-            curMediaStream = null;
+            })(mediaStream.getTracks());
           }
-        }
-
-        function create(mediaStream) {
-          destroy();
-          curMediaStream = mediaStream;
-          curMediaStreamURL = window.URL.createObjectURL(curMediaStream);
-          return curMediaStreamURL;
         }
 
         function enumerateDevices() {
@@ -143,11 +130,16 @@
           append(canvas.toDataURL("image/jpeg"));
         });
 
+        video.addEventListener("load", function (evt) {
+          video.play();
+        });
+
         selector.addEventListener("change", function (evt) {
+          video.srcObject = null;
+          destroy(video.srcObject);
           var constraints = { video: { deviceId: { exact: selector.value } }, audio: false };
           navigator.mediaDevices.getUserMedia(constraints).then(function (mediaStream) {
-            video.src = create(mediaStream);
-            video.play();
+            video.srcObject = mediaStream;
           }).catch(console.error);
         });
 
