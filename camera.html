@@ -135,12 +135,12 @@
         });
 
         selector.addEventListener("change", function (evt) {
-          video.srcObject = null;
           destroy(video.srcObject);
+          video.srcObject = null;
           var constraints = { video: { deviceId: { exact: selector.value } }, audio: false };
           navigator.mediaDevices.getUserMedia(constraints).then(function (mediaStream) {
             video.srcObject = mediaStream;
-          }).catch(console.error);
+          }).catch(error => console.error(error));
         });
 
         navigator.mediaDevices.addEventListener("devicechange", enumerateDevices);
