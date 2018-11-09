@@ -17,49 +17,84 @@
         return Array.from({ length: n }, () => `${Math.floor(Math.random() * 10)}`).join("");
       }
       function pick(n, m) {
-        return n && n.length === 2 ? n : m;
-      }
-      function generate(f) {
-        const n1 = pick(f.$n1.value, rand(2));
-        const n2 = pick(f.$n2.value, rand(2));
-        const n3 = rand(3);
-        const n4 = n1 + n2 + n3
-        const n5 = n4 + checkdigit(n4);
-        document.getElementById("result").innerHTML = n5;
-      }
-      async function write(str) {
-        try {
-          await navigator.clipboard.writeText(str);
-          document.getElementById("copied").innerHTML = "Copied";
-          setTimeout(() => document.getElementById("copied").innerHTML = "", 1000);
-        } catch (e) {
-        }
+        return n && n.length === m ? n : rand(m);
       }
       document.addEventListener("DOMContentLoaded", () => {
-        document.forms.pubins.addEventListener("submit", (evt) => {
+        document.forms.pubins1.addEventListener("submit", evt => {
           evt.preventDefault();
-          generate(document.forms.pubins);
+          const f = evt.currentTarget;
+          const n1 = pick(f.$n1.value, 2);
+          const n2 = pick(f.$n2.value, 2);
+          const n3 = rand(3);
+          const n4 = n1 + n2 + n3
+          const n5 = n4 + checkdigit(n4);
+          const result = f.querySelector(".result");
+          result.innerHTML = n5;
         });
-        document.getElementById("result").addEventListener("click", (evt) => {
-          write(document.getElementById("result").innerHTML);
+
+        document.forms.pubins2.addEventListener("submit", evt => {
+          evt.preventDefault();
+          const f = evt.currentTarget;
+          const n1 = pick(f.$n1.value, 6);
+          const n2 = n1 + checkdigit(n1);
+          const result = f.querySelector(".result");
+          result.innerHTML = n2;
+        });
+
+        Array.from(document.querySelectorAll(".copies")).forEach(element => {
+          async function writeText(str) {
+            try {
+              await navigator.clipboard.writeText(str);
+            } catch (e) {
+              throw e;
+            }
+          }
+          const result = element.querySelector(".result");
+          const copied = element.querySelector(".copied");
+          result.addEventListener("click", evt => {
+            const contents = result.innerHTML;
+            writeText(contents).then(() => {
+              copied.innerHTML = "Copied";
+              setTimeout(() => copied.innerHTML = "", 1000);
+            }).catch(console.error.bind(null));
+          });
         });
       });
     </script>
   </head>
   <body>
-    <form name="pubins">
-      <label>
-        法別
-        <input type="text" pattern="^(\d\d)?$" name="$n1" list="n1list"/>
-      </label>
-      <label>
-        都道府県
-        <input type="text" pattern="^(\d\d)?$" name="$n2" list="n2list"/>
-      </label>
-      <button type="submit">Generate</button>
-      <span id="result"></span>
-      <span id="copied"></span>
-    </form>
+    <div>
+      <form name="pubins1">
+        <label>
+          法別
+          <input type="text" pattern="^(\d\d)?$" name="$n1" list="n1list" />
+        </label>
+        <label>
+          都道府県
+          <input type="text" pattern="^(\d\d)?$" name="$n2" list="n2list" />
+        </label>
+        <button type="submit">Generate</button>
+        <span class="copies">
+          <span class="result"></span>
+          <span class="copied"></span>
+        </span>
+      </form>
+    </div>
+
+    <div>
+      <form name="pubins2">
+        <label>
+          受給者
+          <input type="text" pattern="^(\d\d\d\d\d\d)?$" name="$n1" />
+        </label>
+        <button type="submit">Generate</button>
+        <span class="copies">
+          <span class="result"></span>
+          <span class="copied"></span>
+        </span>
+      </form>
+    </div>
+
     <datalist id="n1list">
       <option value="10" /><option value="11" /><option value="12" />
       <option value="13" /><option value="14" /><option value="15" />
