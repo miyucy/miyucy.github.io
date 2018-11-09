@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, user-scalable=yes, initial-scale=1, maximum-scale=1">
+    <script>
+      function checkdigit(str) {
+        const e = str.split("").reverse().reduce((r, n, i) => {
+          const m = ((i % 2) === 0) ? 2 : 1;
+          return [...r, ...`${parseInt(n, 10) * m}`.split("")];
+        }, []).map(n => parseInt(n, 10)).reduce((r, n) => r + n, 0);
+        const f = e % 10;
+        return f === 0 ? 0 : 10 - f
+      }
+      function rand(n) {
+        return Array.from({ length: n }, () => `${Math.floor(Math.random() * 10)}`).join("");
+      }
+      function pick(n, m) {
+        return n && n.length === 2 ? n : m;
+      }
+      function generate(f) {
+        const n1 = pick(f.$n1.value, rand(2));
+        const n2 = pick(f.$n2.value, rand(2));
+        const n3 = rand(3);
+        const n4 = n1 + n2 + n3
+        const n5 = n4 + checkdigit(n4);
+        document.getElementById("result").innerHTML = n5;
+      }
+      async function write(str) {
+        try {
+          await navigator.clipboard.writeText(str);
+          document.getElementById("copied").innerHTML = "Copied";
+          setTimeout(() => document.getElementById("copied").innerHTML = "", 1000);
+        } catch (e) {
+        }
+      }
+      document.addEventListener("DOMContentLoaded", () => {
+        document.forms.pubins.addEventListener("submit", (evt) => {
+          evt.preventDefault();
+          generate(document.forms.pubins);
+        });
+        document.getElementById("result").addEventListener("click", (evt) => {
+          write(document.getElementById("result").innerHTML);
+        });
+      });
+    </script>
+  </head>
+  <body>
+    <form name="pubins">
+      <label>
+        法別
+        <input type="text" pattern="^(\d\d)?$" name="$n1" list="n1list"/>
+      </label>
+      <label>
+        都道府県
+        <input type="text" pattern="^(\d\d)?$" name="$n2" list="n2list"/>
+      </label>
+      <button type="submit">Generate</button>
+      <span id="result"></span>
+      <span id="copied"></span>
+    </form>
+    <datalist id="n1list">
+      <option value="10" /><option value="11" /><option value="12" />
+      <option value="13" /><option value="14" /><option value="15" />
+      <option value="16" /><option value="17" /><option value="18" />
+      <option value="19" /><option value="20" /><option value="21" />
+      <option value="22" /><option value="23" /><option value="24" />
+      <option value="25" /><option value="28" /><option value="29" />
+      <option value="30" /><option value="51" /><option value="52" />
+      <option value="53" /><option value="66" /><option value="79" />
+    </datalist>
+    <datalist id="n2list">
+      <option value="01" /><option value="02" /><option value="03" />
+      <option value="04" /><option value="05" /><option value="06" />
+      <option value="07" /><option value="08" /><option value="09" />
+      <option value="10" /><option value="11" /><option value="12" />
+      <option value="13" /><option value="14" /><option value="15" />
+      <option value="16" /><option value="17" /><option value="18" />
+      <option value="19" /><option value="20" /><option value="21" />
+      <option value="22" /><option value="23" /><option value="24" />
+      <option value="25" /><option value="26" /><option value="27" />
+      <option value="28" /><option value="29" /><option value="30" />
+      <option value="31" /><option value="32" /><option value="33" />
+      <option value="34" /><option value="35" /><option value="36" />
+      <option value="37" /><option value="38" /><option value="39" />
+      <option value="40" /><option value="41" /><option value="42" />
+      <option value="43" /><option value="44" /><option value="45" />
+      <option value="46" /><option value="47" />
+    </datalist>
+  </body>
+</html>
