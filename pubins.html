@@ -67,11 +67,89 @@
       <form name="pubins1">
         <label>
           法別
-          <input type="text" pattern="^(\d\d)?$" name="$n1" list="n1list" />
+          <select name="$n1">
+            <option />
+            <option value="10">[10] 感染症（３７条の２）(感３７の２)</option>
+            <option value="11">[11] 感染症（結核入院）(結核入院)</option>
+            <option value="12">[12] 生活保護(生活保護)</option>
+            <option value="13">[13] 戦傷病者（療養給付）(戦傷傷病)</option>
+            <option value="14">[14] 戦傷病者（更正）(戦傷更正)</option>
+            <option value="15">[15] 自立支援医療（更生）(更生)</option>
+            <option value="16">[16] 自立支援医療（育成）(育成)</option>
+            <option value="17">[17] 児童福祉（療養医療）(児童療育)</option>
+            <option value="18">[18] 原爆認定疾病(原爆認定)</option>
+            <option value="19">[19] 原爆一般疾病(原爆一般)</option>
+            <option value="20">[20] 精神措置入院(精神入院)</option>
+            <option value="21">[21] 自立支援医療（精神通院）(精神通院)</option>
+            <option value="23">[23] 母子家庭(養育)</option>
+            <option value="24">[24] 療養介護医療(療養介護)</option>
+            <option value="25">[25] 中国残留邦人等支援(残留邦人等)</option>
+            <option value="28">[28] 感染症（１類・２類）(感染症入院)</option>
+            <option value="29">[29] 新感染症(新感染)</option>
+            <option value="30">[30] 心神喪失者等医療(心神喪失)</option>
+            <option value="38">[38] 肝炎治療特別促進事業医療(肝炎治療)</option>
+            <option value="51">[51] 特定疾患（負担無し）(特定負無)</option>
+            <option value="51">[51] 特定疾患（負担有り）(特定負有)</option>
+            <option value="52">[52] 小児慢性特定疾病医療(小児特定)</option>
+            <option value="53">[53] 児童保護措置(児童保護)</option>
+            <option value="54">[54] 難病医療(難病)</option>
+            <option value="62">[62] 特定Ｂ型肝炎ウイルス感染者医療(Ｂ型肝炎)</option>
+            <option value="66">[66] 石綿健康被害救済(石綿)</option>
+            <option value="79">[79] 障害児施設医療(障害児施設)</option>
+          </select>
         </label>
         <label>
           都道府県
-          <input type="text" pattern="^(\d\d)?$" name="$n2" list="n2list" />
+          <select name="$n2">
+            <option />
+            <option value="01">[01] 北海道</option>
+            <option value="02">[02] 青森県</option>
+            <option value="03">[03] 岩手県</option>
+            <option value="04">[04] 宮城県</option>
+            <option value="05">[05] 秋田県</option>
+            <option value="06">[06] 山形県</option>
+            <option value="07">[07] 福島県</option>
+            <option value="08">[08] 茨城県</option>
+            <option value="09">[09] 栃木県</option>
+            <option value="10">[10] 群馬県</option>
+            <option value="11">[11] 埼玉県</option>
+            <option value="12">[12] 千葉県</option>
+            <option value="13">[13] 東京都</option>
+            <option value="14">[14] 神奈川県</option>
+            <option value="15">[15] 新潟県</option>
+            <option value="16">[16] 富山県</option>
+            <option value="17">[17] 石川県</option>
+            <option value="18">[18] 福井県</option>
+            <option value="19">[19] 山梨県</option>
+            <option value="20">[20] 長野県</option>
+            <option value="21">[21] 岐阜県</option>
+            <option value="22">[22] 静岡県</option>
+            <option value="23">[23] 愛知県</option>
+            <option value="24">[24] 三重県</option>
+            <option value="25">[25] 滋賀県</option>
+            <option value="26">[26] 京都府</option>
+            <option value="27">[27] 大阪府</option>
+            <option value="28">[28] 兵庫県</option>
+            <option value="29">[29] 奈良県</option>
+            <option value="30">[30] 和歌山県</option>
+            <option value="31">[31] 鳥取県</option>
+            <option value="32">[32] 島根県</option>
+            <option value="33">[33] 岡山県</option>
+            <option value="34">[34] 広島県</option>
+            <option value="35">[35] 山口県</option>
+            <option value="36">[36] 徳島県</option>
+            <option value="37">[37] 香川県</option>
+            <option value="38">[38] 愛媛県</option>
+            <option value="39">[39] 高知県</option>
+            <option value="40">[40] 福岡県</option>
+            <option value="41">[41] 佐賀県</option>
+            <option value="42">[42] 長崎県</option>
+            <option value="43">[43] 熊本県</option>
+            <option value="44">[44] 大分県</option>
+            <option value="45">[45] 宮崎県</option>
+            <option value="46">[46] 鹿児島県</option>
+            <option value="47">[47] 沖縄県</option>
+          </select>
         </label>
         <button type="submit">Generate</button>
         <span class="copies">
@@ -94,34 +172,5 @@
         </span>
       </form>
     </div>
-
-    <datalist id="n1list">
-      <option value="10" /><option value="11" /><option value="12" />
-      <option value="13" /><option value="14" /><option value="15" />
-      <option value="16" /><option value="17" /><option value="18" />
-      <option value="19" /><option value="20" /><option value="21" />
-      <option value="22" /><option value="23" /><option value="24" />
-      <option value="25" /><option value="28" /><option value="29" />
-      <option value="30" /><option value="51" /><option value="52" />
-      <option value="53" /><option value="66" /><option value="79" />
-    </datalist>
-    <datalist id="n2list">
-      <option value="01" /><option value="02" /><option value="03" />
-      <option value="04" /><option value="05" /><option value="06" />
-      <option value="07" /><option value="08" /><option value="09" />
-      <option value="10" /><option value="11" /><option value="12" />
-      <option value="13" /><option value="14" /><option value="15" />
-      <option value="16" /><option value="17" /><option value="18" />
-      <option value="19" /><option value="20" /><option value="21" />
-      <option value="22" /><option value="23" /><option value="24" />
-      <option value="25" /><option value="26" /><option value="27" />
-      <option value="28" /><option value="29" /><option value="30" />
-      <option value="31" /><option value="32" /><option value="33" />
-      <option value="34" /><option value="35" /><option value="36" />
-      <option value="37" /><option value="38" /><option value="39" />
-      <option value="40" /><option value="41" /><option value="42" />
-      <option value="43" /><option value="44" /><option value="45" />
-      <option value="46" /><option value="47" />
-    </datalist>
   </body>
 </html>
