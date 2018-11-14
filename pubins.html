@@ -16,15 +16,25 @@
       function rand(n) {
         return Array.from({ length: n }, () => `${Math.floor(Math.random() * 10)}`).join("");
       }
-      function pick(n, m) {
-        return n && n.length === m ? n : rand(m);
+      function pick(select) {
+        const value = select.value;
+        if (value && value !== "") {
+          return value;
+        }
+
+        const options = Array.from(select.options).map(e => e.value).filter(Boolean);
+        return options[Math.floor(Math.random() * options.length)];
+      }
+      function qick(str, len) {
+        const r = len - str.length
+        return str + (r > 0 ? rand(len - str.length) : "");
       }
       document.addEventListener("DOMContentLoaded", () => {
         document.forms.pubins1.addEventListener("submit", evt => {
           evt.preventDefault();
           const f = evt.currentTarget;
-          const n1 = pick(f.$n1.value, 2);
-          const n2 = pick(f.$n2.value, 2);
+          const n1 = pick(f.$n1);
+          const n2 = pick(f.$n2);
           const n3 = rand(3);
           const n4 = n1 + n2 + n3
           const n5 = n4 + checkdigit(n4);
@@ -35,7 +45,7 @@
         document.forms.pubins2.addEventListener("submit", evt => {
           evt.preventDefault();
           const f = evt.currentTarget;
-          const n1 = pick(f.$n1.value, 6);
+          const n1 = qick(f.$n1.value, 6);
           const n2 = n1 + checkdigit(n1);
           const result = f.querySelector(".result");
           result.innerHTML = n2;
@@ -163,7 +173,7 @@
       <form name="pubins2">
         <label>
           受給者
-          <input type="text" pattern="^(\d\d\d\d\d\d)?$" name="$n1" />
+          <input type="text" pattern="^\d{0,6}$" name="$n1" />
         </label>
         <button type="submit">Generate</button>
         <span class="copies">
