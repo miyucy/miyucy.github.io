@@ -1,48 +1,65 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <meta charset="utf-8">
-    <meta http-equiv="x-ua-compatible" content="ie=edge">
-    <meta name="viewport" content="width=device-width, user-scalable=yes, initial-scale=1, maximum-scale=1">
+    <meta charset="utf-8" />
+    <meta http-equiv="x-ua-compatible" content="ie=edge" />
+    <meta name="viewport" content="width=device-width, user-scalable=yes, initial-scale=1, maximum-scale=1" />
     <script>
       function checkdigit(str) {
-        const e = str.split("").reverse().reduce((r, n, i) => {
-          const m = ((i % 2) === 0) ? 2 : 1;
-          return [...r, ...`${parseInt(n, 10) * m}`.split("")];
-        }, []).map(n => parseInt(n, 10)).reduce((r, n) => r + n, 0);
+        const e = str
+          .split("")
+          .reverse()
+          .reduce((r, n, i) => {
+            const m = i % 2 === 0 ? 2 : 1;
+            return [...r, ...`${parseInt(n, 10) * m}`.split("")];
+          }, [])
+          .map(n => parseInt(n, 10))
+          .reduce((r, n) => r + n, 0);
         const f = e % 10;
-        return f === 0 ? 0 : 10 - f
+        return f === 0 ? 0 : 10 - f;
       }
       function rand(n) {
         return Array.from({ length: n }, () => `${Math.floor(Math.random() * 10)}`).join("");
       }
       function pick(select) {
-        const value = select.value;
-        if (value && value !== "") {
+        const value = `${select.value}`;
+        if (value === "random") {
+          const options = Array.from(select.options).map(e => e.value).filter(e => e !== "random");
+          return options[Math.floor(Math.random() * options.length)];
+        } else {
           return value;
         }
-
-        const options = Array.from(select.options).map(e => e.value).filter(Boolean);
-        return options[Math.floor(Math.random() * options.length)];
       }
       function qick(str, len) {
-        const r = len - str.length
+        const r = len - str.length;
         return str + (r > 0 ? rand(len - str.length) : "");
       }
       document.addEventListener("DOMContentLoaded", () => {
-        document.forms.pubins1.addEventListener("submit", evt => {
+        document.forms.hltins.addEventListener("submit", evt => {
           evt.preventDefault();
           const f = evt.currentTarget;
           const n1 = pick(f.$n1);
           const n2 = pick(f.$n2);
           const n3 = rand(3);
-          const n4 = n1 + n2 + n3
+          const n4 = n1 + n2 + n3;
           const n5 = n4 + checkdigit(n4);
           const result = f.querySelector(".result");
           result.innerHTML = n5;
         });
 
-        document.forms.pubins2.addEventListener("submit", evt => {
+        document.forms.pubins.addEventListener("submit", evt => {
+          evt.preventDefault();
+          const f = evt.currentTarget;
+          const n1 = pick(f.$n1);
+          const n2 = pick(f.$n2);
+          const n3 = rand(3);
+          const n4 = n1 + n2 + n3;
+          const n5 = n4 + checkdigit(n4);
+          const result = f.querySelector(".result");
+          result.innerHTML = n5;
+        });
+
+        document.forms.insnum.addEventListener("submit", evt => {
           evt.preventDefault();
           const f = evt.currentTarget;
           const n1 = qick(f.$n1.value, 6);
@@ -63,10 +80,12 @@
           const copied = element.querySelector(".copied");
           result.addEventListener("click", evt => {
             const contents = result.innerHTML;
-            writeText(contents).then(() => {
-              copied.innerHTML = "Copied";
-              setTimeout(() => copied.innerHTML = "", 1000);
-            }).catch(console.error.bind(null));
+            writeText(contents)
+              .then(() => {
+                copied.innerHTML = "Copied";
+                setTimeout(() => (copied.innerHTML = ""), 1000);
+              })
+              .catch(console.error.bind(null));
           });
         });
       });
@@ -74,44 +93,38 @@
   </head>
   <body>
     <div>
-      <form name="pubins1">
+      <form name="hltins">
         <label>
           法別
           <select name="$n1">
-            <option />
-            <option value="10">[10] 感染症（３７条の２）(感３７の２)</option>
-            <option value="11">[11] 感染症（結核入院）(結核入院)</option>
-            <option value="12">[12] 生活保護(生活保護)</option>
-            <option value="13">[13] 戦傷病者（療養給付）(戦傷傷病)</option>
-            <option value="14">[14] 戦傷病者（更正）(戦傷更正)</option>
-            <option value="15">[15] 自立支援医療（更生）(更生)</option>
-            <option value="16">[16] 自立支援医療（育成）(育成)</option>
-            <option value="17">[17] 児童福祉（療養医療）(児童療育)</option>
-            <option value="18">[18] 原爆認定疾病(原爆認定)</option>
-            <option value="19">[19] 原爆一般疾病(原爆一般)</option>
-            <option value="20">[20] 精神措置入院(精神入院)</option>
-            <option value="21">[21] 自立支援医療（精神通院）(精神通院)</option>
-            <option value="23">[23] 母子家庭(養育)</option>
-            <option value="24">[24] 療養介護医療(療養介護)</option>
-            <option value="25">[25] 中国残留邦人等支援(残留邦人等)</option>
-            <option value="28">[28] 感染症（１類・２類）(感染症入院)</option>
-            <option value="29">[29] 新感染症(新感染)</option>
-            <option value="30">[30] 心神喪失者等医療(心神喪失)</option>
-            <option value="38">[38] 肝炎治療特別促進事業医療(肝炎治療)</option>
-            <option value="51">[51] 特定疾患（負担無し）(特定負無)</option>
-            <option value="51">[51] 特定疾患（負担有り）(特定負有)</option>
-            <option value="52">[52] 小児慢性特定疾病医療(小児特定)</option>
-            <option value="53">[53] 児童保護措置(児童保護)</option>
-            <option value="54">[54] 難病医療(難病)</option>
-            <option value="62">[62] 特定Ｂ型肝炎ウイルス感染者医療(Ｂ型肝炎)</option>
-            <option value="66">[66] 石綿健康被害救済(石綿)</option>
-            <option value="79">[79] 障害児施設医療(障害児施設)</option>
+            <option value="random"></option>
+            <option value="">国民健康保険(国保)</option>
+            <option value="">退職特別療養費(退特療費)</option>
+            <option value="">特別療養費(特療費)</option>
+            <option value="01">[01] 協会けんぽ(協会)</option>
+            <option value="02">[02] 船員保険(船員)</option>
+            <option value="03">[03] 一般療養(一般)</option>
+            <option value="04">[04] 特別療養(特別)</option>
+            <option value="06">[06] 組合健保(組合)</option>
+            <option value="07">[07] 自衛官等保険(自官)</option>
+            <option value="31">[31] 国家公務員共済組合(国公)</option>
+            <option value="32">[32] 地方公務員共済組合(地公)</option>
+            <option value="33">[33] 警察共済組合(警察)</option>
+            <option value="34">[34] 公立・私立学校共済(学校)</option>
+            <option value="39">[39] 後期高齢者医療特別療養費(後期特療費)</option>
+            <option value="39">[39] 後期高齢者医療(後期高齢者)</option>
+            <option value="63">[63] 特例退職（組合健保）(退組合)</option>
+            <option value="67">[67] 退職者医療（国保）(退国保)</option>
+            <option value="72">[72] 特例退職（国家公務員）(退国公)</option>
+            <option value="73">[73] 特例退職（地方公務員）(退地公)</option>
+            <option value="74">[74] 特例退職（警察）(退警察)</option>
+            <option value="75">[75] 特例退職（学校）(退学校)</option>
           </select>
         </label>
         <label>
           都道府県
           <select name="$n2">
-            <option />
+            <option value="random"></option>
             <option value="01">[01] 北海道</option>
             <option value="02">[02] 青森県</option>
             <option value="03">[03] 岩手県</option>
@@ -162,24 +175,108 @@
           </select>
         </label>
         <button type="submit">Generate</button>
-        <span class="copies">
-          <span class="result"></span>
-          <span class="copied"></span>
-        </span>
+        <span class="copies"> <span class="result"></span> <span class="copied"></span> </span>
       </form>
     </div>
 
     <div>
-      <form name="pubins2">
+      <form name="pubins">
         <label>
-          受給者
-          <input type="text" pattern="^\d{0,6}$" name="$n1" />
+          法別
+          <select name="$n1">
+            <option value="random"></option>
+            <option value="10">[10] 感染症（３７条の２）(感３７の２)</option>
+            <option value="11">[11] 感染症（結核入院）(結核入院)</option>
+            <option value="12">[12] 生活保護(生活保護)</option>
+            <option value="13">[13] 戦傷病者（療養給付）(戦傷傷病)</option>
+            <option value="14">[14] 戦傷病者（更正）(戦傷更正)</option>
+            <option value="15">[15] 自立支援医療（更生）(更生)</option>
+            <option value="16">[16] 自立支援医療（育成）(育成)</option>
+            <option value="17">[17] 児童福祉（療養医療）(児童療育)</option>
+            <option value="18">[18] 原爆認定疾病(原爆認定)</option>
+            <option value="19">[19] 原爆一般疾病(原爆一般)</option>
+            <option value="20">[20] 精神措置入院(精神入院)</option>
+            <option value="21">[21] 自立支援医療（精神通院）(精神通院)</option>
+            <option value="23">[23] 母子家庭(養育)</option>
+            <option value="24">[24] 療養介護医療(療養介護)</option>
+            <option value="25">[25] 中国残留邦人等支援(残留邦人等)</option>
+            <option value="28">[28] 感染症（１類・２類）(感染症入院)</option>
+            <option value="29">[29] 新感染症(新感染)</option>
+            <option value="30">[30] 心神喪失者等医療(心神喪失)</option>
+            <option value="38">[38] 肝炎治療特別促進事業医療(肝炎治療)</option>
+            <option value="51">[51] 特定疾患（負担無し）(特定負無)</option>
+            <option value="51">[51] 特定疾患（負担有り）(特定負有)</option>
+            <option value="52">[52] 小児慢性特定疾病医療(小児特定)</option>
+            <option value="53">[53] 児童保護措置(児童保護)</option>
+            <option value="54">[54] 難病医療(難病)</option>
+            <option value="62">[62] 特定Ｂ型肝炎ウイルス感染者医療(Ｂ型肝炎)</option>
+            <option value="66">[66] 石綿健康被害救済(石綿)</option>
+            <option value="79">[79] 障害児施設医療(障害児施設)</option>
+          </select>
+        </label>
+        <label>
+          都道府県
+          <select name="$n2">
+            <option value="random"></option>
+            <option value="01">[01] 北海道</option>
+            <option value="02">[02] 青森県</option>
+            <option value="03">[03] 岩手県</option>
+            <option value="04">[04] 宮城県</option>
+            <option value="05">[05] 秋田県</option>
+            <option value="06">[06] 山形県</option>
+            <option value="07">[07] 福島県</option>
+            <option value="08">[08] 茨城県</option>
+            <option value="09">[09] 栃木県</option>
+            <option value="10">[10] 群馬県</option>
+            <option value="11">[11] 埼玉県</option>
+            <option value="12">[12] 千葉県</option>
+            <option value="13">[13] 東京都</option>
+            <option value="14">[14] 神奈川県</option>
+            <option value="15">[15] 新潟県</option>
+            <option value="16">[16] 富山県</option>
+            <option value="17">[17] 石川県</option>
+            <option value="18">[18] 福井県</option>
+            <option value="19">[19] 山梨県</option>
+            <option value="20">[20] 長野県</option>
+            <option value="21">[21] 岐阜県</option>
+            <option value="22">[22] 静岡県</option>
+            <option value="23">[23] 愛知県</option>
+            <option value="24">[24] 三重県</option>
+            <option value="25">[25] 滋賀県</option>
+            <option value="26">[26] 京都府</option>
+            <option value="27">[27] 大阪府</option>
+            <option value="28">[28] 兵庫県</option>
+            <option value="29">[29] 奈良県</option>
+            <option value="30">[30] 和歌山県</option>
+            <option value="31">[31] 鳥取県</option>
+            <option value="32">[32] 島根県</option>
+            <option value="33">[33] 岡山県</option>
+            <option value="34">[34] 広島県</option>
+            <option value="35">[35] 山口県</option>
+            <option value="36">[36] 徳島県</option>
+            <option value="37">[37] 香川県</option>
+            <option value="38">[38] 愛媛県</option>
+            <option value="39">[39] 高知県</option>
+            <option value="40">[40] 福岡県</option>
+            <option value="41">[41] 佐賀県</option>
+            <option value="42">[42] 長崎県</option>
+            <option value="43">[43] 熊本県</option>
+            <option value="44">[44] 大分県</option>
+            <option value="45">[45] 宮崎県</option>
+            <option value="46">[46] 鹿児島県</option>
+            <option value="47">[47] 沖縄県</option>
+          </select>
         </label>
         <button type="submit">Generate</button>
-        <span class="copies">
-          <span class="result"></span>
-          <span class="copied"></span>
-        </span>
+        <span class="copies"> <span class="result"></span> <span class="copied"></span> </span>
+      </form>
+    </div>
+
+    <div>
+      <form name="insnum">
+        <label> 受給者 <input type="text" pattern="^\d{0,6}$" name="$n1" /> </label>
+        <button type="submit">Generate</button>
+        <span class="copies"> <span class="result"></span> <span class="copied"></span> </span>
       </form>
     </div>
   </body>
