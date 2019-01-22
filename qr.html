@@ -6,17 +6,30 @@
     <meta name="viewport" content="width=device-width, user-scalable=yes, initial-scale=1, maximum-scale=1" />
     <script>
       document.addEventListener("DOMContentLoaded", () => {
+        const canvas = document.getElementById("canvas");
+        const img = document.getElementById("img");
+        const download = document.getElementById("download");
+        const form = document.forms.form;
         const search = location.search;
+
         if (search && search.length > 0) {
-          document.forms.form.textarea.value = decodeURIComponent(search.slice(1));
+          form.textarea.value = decodeURIComponent(search.slice(1));
         }
-        document.forms.form.addEventListener("submit", evt => {
+
+        img.addEventListener("load", () => {
+          canvas.width = 300;
+          canvas.height = 300;
+          canvas.getContext("2d").drawImage(img, 0, 0, 300, 300);
+          download.href = canvas.toDataURL("image/png");
+          download.download = Date.now() + ".png";
+        });
+
+        form.addEventListener("submit", evt => {
           evt.preventDefault();
-          const f = evt.currentTarget;
-          const v = f.textarea.value;
-          const i = document.getElementById("img");
-          i.src = "https://chart.googleapis.com/chart?chs=300x300&cht=qr&chl=" + encodeURIComponent(v) + "";
-          history.pushState(history.state, document.title, location.pathname + "?" + encodeURIComponent(v));
+          const value = form.textarea.value;
+          const encodedValue = encodeURIComponent(value);
+          img.src = "https://chart.googleapis.com/chart?chs=300x300&cht=qr&chl=" + encodedValue;
+          history.pushState(history.state, document.title, location.pathname + "?" + encodedValue);
         });
       });
     </script>
@@ -27,7 +40,8 @@
       <button type="submit">Generate</button>
     </form>
     <div style="display: flex; justify-content: center; justify-content: center; align-items: center;">
-      <img id="img" />
+      <a id="download"><img id="img" crossorigin="anonymous" /></a>
     </div>
+    <canvas id="canvas" style="display: hidden;"></canvas>
   </body>
 </html>
