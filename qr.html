@@ -10,11 +10,7 @@
         const img = document.getElementById("img");
         const download = document.getElementById("download");
         const form = document.forms.form;
-        const search = location.search;
-
-        if (search && search.length > 0) {
-          form.textarea.value = decodeURIComponent(search.slice(1));
-        }
+        const submit = document.getElementById("submit");
 
         img.addEventListener("load", () => {
           canvas.width = 300;
@@ -29,15 +25,26 @@
           const value = form.textarea.value;
           const encodedValue = encodeURIComponent(value);
           img.src = "https://chart.googleapis.com/chart?chs=300x300&cht=qr&chl=" + encodedValue;
-          history.pushState(history.state, document.title, location.pathname + "?" + encodedValue);
+
+          const url = new URL(location.toString());
+          url.searchParams.set("v", encodedValue);
+          history.pushState(history.state, document.title, url.toString());
         });
+
+        {
+          const url = new URL(location.toString());
+          if (url.searchParams.get("v")) {
+            form.textarea.value = url.searchParams.get("v");
+            submit.click();
+          }
+        }
       });
     </script>
   </head>
   <body>
     <form name="form">
       <textarea name="textarea"></textarea>
-      <button type="submit">Generate</button>
+      <button id="submit" type="submit">Generate</button>
     </form>
     <div style="display: flex; justify-content: center; justify-content: center; align-items: center;">
       <a id="download"><img id="img" crossorigin="anonymous" /></a>
