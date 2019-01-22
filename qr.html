@@ -8,7 +8,7 @@
       document.addEventListener("DOMContentLoaded", () => {
         const search = location.search;
         if (search && search.length > 0) {
-          document.forms.form.textarea.value = search;
+          document.forms.form.textarea.value = decodeURIComponent(search.slice(1));
         }
         document.forms.form.addEventListener("submit", evt => {
           evt.preventDefault();
@@ -16,6 +16,7 @@
           const v = f.textarea.value;
           const i = document.getElementById("img");
           i.src = "https://chart.googleapis.com/chart?chs=300x300&cht=qr&chl=" + encodeURIComponent(v) + "";
+          history.pushState(history.state, document.title, location.pathname + "?" + encodeURIComponent(v));
         });
       });
     </script>
