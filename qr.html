@@ -23,11 +23,10 @@
         form.addEventListener("submit", evt => {
           evt.preventDefault();
           const value = form.textarea.value;
-          const encodedValue = encodeURIComponent(value);
-          img.src = "https://chart.googleapis.com/chart?chs=300x300&cht=qr&chl=" + encodedValue;
+          img.src = "https://chart.googleapis.com/chart?chs=300x300&cht=qr&chl=" + encodeURIComponent(value);
 
           const url = new URL(location.toString());
-          url.searchParams.set("v", encodedValue);
+          url.searchParams.set("v", value);
           history.pushState(history.state, document.title, url.toString());
         });
 
