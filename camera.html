@@ -1,17 +1,37 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <meta charset="utf-8">
-    <meta http-equiv="x-ua-compatible" content="ie=edge">
-    <meta name="viewport" content="width=device-width, user-scalable=yes, initial-scale=1, maximum-scale=1">
-    <script src="https://webrtc.github.io/adapter/adapter-latest.js"></script>
+    <meta charset="utf-8" />
+    <meta http-equiv="x-ua-compatible" content="ie=edge" />
+    <meta name="viewport" content="width=device-width, user-scalable=yes, initial-scale=1, maximum-scale=1" />
+    <script src="https://unpkg.com/webrtc-adapter@7.7.0/out/adapter.js"></script>
     <style>
-     #camera { display: block; margin: auto; max-width: 100%; }
-     #roll { display: flex; flex-direction: row-reverse; padding-left: 0; list-style: none; }
-     #roll li { flex: 1 1 auto; }
-     #roll img { display: block;  max-width: 100%; height: auto; }
-     #selector { width: 100%; font-size: large; }
-     .hidden { display: none; }
+      #camera {
+        display: block;
+        margin: auto;
+        max-width: 100%;
+      }
+      #roll {
+        display: flex;
+        flex-direction: row-reverse;
+        padding-left: 0;
+        list-style: none;
+      }
+      #roll li {
+        flex: 1 1 auto;
+      }
+      #roll img {
+        display: block;
+        max-width: 100%;
+        height: auto;
+      }
+      #selector {
+        width: 100%;
+        font-size: large;
+      }
+      .hidden {
+        display: none;
+      }
     </style>
   </head>
   <body>
@@ -28,16 +48,13 @@
       </div>
     </div>
     <script>
-      document.addEventListener("DOMContentLoaded", function () {
-        var video = document.getElementById("camera");
-        var canvas = document.getElementById("canvas");
-        var anchor = document.getElementById("anchor");
-        var roll = document.getElementById("roll");
-        var selector = document.getElementById("selector");
-        var dataURLs = [];
-        var deviceIds = [];
-        var curMediaStreamURL = null;
-        var curMediaStream = null;
+      document.addEventListener("DOMContentLoaded", () => {
+        const video = document.getElementById("camera");
+        const canvas = document.getElementById("canvas");
+        const anchor = document.getElementById("anchor");
+        const roll = document.getElementById("roll");
+        const selector = document.getElementById("selector");
+        const dataURLs = [];
 
         function removeChildren(node) {
           while (node.firstChild) {
@@ -47,9 +64,9 @@
 
         function download(dataURL) {
           anchor.href = dataURL;
-          anchor.download = "" + +(new Date()) + ".jpg";
+          anchor.download = `${Date.now()}.jpg`;
           anchor.click();
-        };
+        }
 
         function append(dataURL) {
           dataURLs.push(dataURL);
@@ -60,87 +77,90 @@
         }
 
         function refresh() {
-          var i, n;
-          var children = dataURLs.map(function (dataURL) {
-            var li = document.createElement("li");
-            var img = document.createElement("img");
-            img.src = dataURL;
-            li.appendChild(img);
-            li.addEventListener("click", function (evt) {
-              evt.preventDefault();
-              download(dataURL);
-            });
-            return li;
-          });
-
           removeChildren(roll);
 
-          n = children.length;
-          for (i = 0; i < n; i++) {
-            roll.appendChild(children[i]);
-          }
+          dataURLs
+            .map((dataURL) => {
+              const li = document.createElement("li");
+              const img = document.createElement("img");
+              img.src = dataURL;
+              li.appendChild(img);
+              li.addEventListener("click", (evt) => {
+                evt.preventDefault();
+                download(dataURL);
+              });
+              return li;
+            })
+            .forEach((li) => {
+              roll.appendChild(li);
+            });
         }
 
         function destroy(mediaStream) {
           if (mediaStream) {
-            (function (tracks) {
-              for (var i=0, n=tracks.length; i<n; i++) {
-                var track = tracks[i];
-                track.stop();
-              }
-            })(mediaStream.getTracks());
+            for (const track of mediaStream.getTracks()) {
+              track.stop();
+            }
           }
         }
 
         function enumerateDevices() {
-          navigator.mediaDevices.enumerateDevices().then(function (devices) {
-            removeChildren(selector);
+          navigator.mediaDevices
+            .enumerateDevices()
+            .then((devices) => {
+              removeChildren(selector);
 
-            devices.filter(function (device) {
-              return device.kind === 'videoinput';
-            }).forEach(function (device) {
-              var option = document.createElement('option');
-              option.value = device.deviceId;
-              option.text = device.label;
-              selector.appendChild(option);
-            });
+              devices
+                .filter((device) => {
+                  return device.kind === "videoinput";
+                })
+                .forEach((device) => {
+                  const option = document.createElement("option");
+                  option.value = device.deviceId;
+                  option.text = device.label;
+                  selector.appendChild(option);
+                });
 
-            if (selector.firstChild) {
-              selector.firstChild.selected = true;
-              selector.dispatchEvent(new Event('change'));
-            } else {
-              destroy();
-            }
+              if (selector.firstChild) {
+                selector.firstChild.selected = true;
+                selector.dispatchEvent(new Event("change"));
+              } else {
+                destroy();
+              }
 
-            if (selector.children.length > 1) {
-              selector.classList.remove('hidden');
-            } else {
-              selector.classList.add('hidden');
-            }
-          }).catch(console.error);
+              if (selector.children.length > 1) {
+                selector.classList.remove("hidden");
+              } else {
+                selector.classList.add("hidden");
+              }
+            })
+            .catch((error) => console.error(error));
         }
 
-        video.addEventListener("click", function (evt) {
+        video.addEventListener("click", (evt) => {
           evt.preventDefault();
-          var videoWidth = video.videoWidth;
-          var videoHeight = video.videoHeight;
+          const videoWidth = video.videoWidth;
+          const videoHeight = video.videoHeight;
           canvas.width = videoWidth;
           canvas.height = videoHeight;
           canvas.getContext("2d").drawImage(video, 0, 0, videoWidth, videoHeight, 0, 0, videoWidth, videoHeight);
           append(canvas.toDataURL("image/jpeg"));
         });
 
-        video.addEventListener("load", function (evt) {
+        video.addEventListener("load", (evt) => {
           video.play();
         });
 
-        selector.addEventListener("change", function (evt) {
+        selector.addEventListener("change", (evt) => {
           destroy(video.srcObject);
           video.srcObject = null;
-          var constraints = { video: { deviceId: { exact: selector.value } }, audio: false };
-          navigator.mediaDevices.getUserMedia(constraints).then(function (mediaStream) {
-            video.srcObject = mediaStream;
-          }).catch(error => console.error(error));
+          const constraints = { video: { deviceId: { exact: selector.value } }, audio: false };
+          navigator.mediaDevices
+            .getUserMedia(constraints)
+            .then((mediaStream) => {
+              video.srcObject = mediaStream;
+            })
+            .catch((error) => console.error(error));
         });
 
         navigator.mediaDevices.addEventListener("devicechange", enumerateDevices);
