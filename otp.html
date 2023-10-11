@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
   <head>
     <meta charset="utf-8" />
@@ -8,27 +8,32 @@
       <input type="text" autocomplete="one-time-code" inputmode="numeric" />
     </form>
     <script>
-if ("OTPCredential" in window) {
-  window.addEventListener("DOMContentLoaded", (e) => {
-    const input = document.querySelector('input[autocomplete="one-time-code"]');
-    if (!input) return;
-    const ac = new AbortController();
-    const form = input.closest("form");
-    if (form) {
-      form.addEventListener("submit", (e) => {
-        ac.abort();
-      });
-    }
-    navigator.credentials
-      .get({
-        otp: { transport: ["sms"] }
-      })
-      .then((otp) => {
-        input.value = otp.code;
-        if (form) form.submit();
-      });
-  });
-}
+      window.onerror = (e) => {
+        console.error(e);
+      };
+      if ("OTPCredential" in window) {
+        window.addEventListener("DOMContentLoaded", (e) => {
+          const input = document.querySelector(
+            'input[autocomplete="one-time-code"]',
+          );
+          if (!input) return;
+          const ac = new AbortController();
+          const form = input.closest("form");
+          if (form) {
+            form.addEventListener("submit", (e) => {
+              ac.abort();
+            });
+          }
+          navigator.credentials
+            .get({
+              otp: { transport: ["sms"] },
+            })
+            .then((otp) => {
+              input.value = otp.code;
+              if (form) form.submit();
+            });
+        });
+      }
     </script>
   </body>
 </html>
