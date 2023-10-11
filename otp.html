@@ -21,15 +21,11 @@ if ("OTPCredential" in window) {
     }
     navigator.credentials
       .get({
-        otp: { transport: ["sms"] },
-        signal: ac.signal,
+        otp: { transport: ["sms"] }
       })
       .then((otp) => {
         input.value = otp.code;
         if (form) form.submit();
-      })
-      .catch((err) => {
-        console.error(err);
       });
   });
 }
