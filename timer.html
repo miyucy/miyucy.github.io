@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>タイマー</title>
+    <style>
+      body {
+        display: grid;
+        place-items: center;
+        min-height: 100vh;
+        margin: 0;
+        background: #f0f0f0;
+      }
+      .container {
+        text-align: center;
+        background: white;
+        padding: 2rem;
+        border-radius: 10px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+      .timer {
+        font-size: 6rem;
+        font-weight: bold;
+        margin: 1rem 0;
+        width: 8ch;
+      }
+      button {
+        font-size: 1.2rem;
+        padding: 0.8rem 1.6rem;
+        margin: 0.5rem;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+      }
+      #startBtn {
+        background: #4caf50;
+        color: white;
+      }
+      #resetBtn {
+        background: #f44336;
+        color: white;
+      }
+      input {
+        font-size: 1.2rem;
+        padding: 0.5rem;
+        width: 100px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>タイマー</h1>
+      <input type="number" id="timeInput" value="30" min="1" max="300" />
+      <div class="timer" id="timer">00:30.00</div>
+      <div>
+        <button id="startBtn">開始</button>
+        <button id="resetBtn">リセット</button>
+      </div>
+    </div>
+
+    <script>
+      let timeLeft = 30;
+      let timerId = null;
+      let startTime;
+      let initialTime;
+
+      const timer = document.getElementById("timer");
+      const startBtn = document.getElementById("startBtn");
+      const resetBtn = document.getElementById("resetBtn");
+      const timeInput = document.getElementById("timeInput");
+
+      function formatTime(time) {
+        const min = Math.floor(time / 60);
+        const sec = Math.floor(time % 60);
+        const cs = Math.floor((time * 100) % 100);
+        return `${min.toString().padStart(2, "0")}:${sec.toString().padStart(2, "0")}.${cs.toString().padStart(2, "0")}`;
+      }
+
+      function tick() {
+        const elapsed = (Date.now() - startTime) / 1000;
+        timeLeft = Math.max(0, initialTime - elapsed);
+        timer.textContent = formatTime(timeLeft);
+        if (timeLeft <= 0) {
+          reset();
+        }
+      }
+
+      function startTimer() {
+        if (timerId === null) {
+          initialTime = parseInt(timeInput.value);
+          startTime = Date.now();
+          startBtn.textContent = "停止";
+          timerId = setInterval(tick, 10);
+        } else {
+          reset();
+        }
+      }
+
+      function resetTimer() {
+        reset();
+        timeLeft = parseInt(timeInput.value);
+        timer.textContent = formatTime(timeLeft);
+      }
+
+      function reset() {
+        clearInterval(timerId);
+        timerId = null;
+        startBtn.textContent = "開始";
+      }
+
+      startBtn.onclick = startTimer;
+      resetBtn.onclick = resetTimer;
+      timeInput.onchange = resetTimer;
+      resetTimer();
+    </script>
+  </body>
+</html>
