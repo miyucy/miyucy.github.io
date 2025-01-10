@@ -38,9 +38,9 @@
         document.forms.hltins.addEventListener("submit", evt => {
           evt.preventDefault();
           const f = evt.currentTarget;
-          const n1 = pick(f.$n1);
-          const n2 = pick(f.$n2);
-          const n3 = rand(3);
+          const n1 = pick(f.$n1); // 2
+          const n2 = pick(f.$n2); // 2
+          const n3 = rand(3);     // 3
           const n4 = n1 + n2 + n3;
           const n5 = n4 + checkdigit(n4);
           const result = f.querySelector(".result");
@@ -50,9 +50,9 @@
         document.forms.pubins.addEventListener("submit", evt => {
           evt.preventDefault();
           const f = evt.currentTarget;
-          const n1 = pick(f.$n1);
-          const n2 = pick(f.$n2);
-          const n3 = rand(3);
+          const n1 = pick(f.$n1); // 2
+          const n2 = pick(f.$n2); // 2
+          const n3 = rand(3);     // 3
           const n4 = n1 + n2 + n3;
           const n5 = n4 + checkdigit(n4);
           const result = f.querySelector(".result");

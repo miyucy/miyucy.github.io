@@ -1,171 +1,224 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
   <head>
-    <meta charset="utf-8" />
-    <meta http-equiv="x-ua-compatible" content="ie=edge" />
-    <meta name="viewport" content="width=device-width, user-scalable=yes, initial-scale=1, maximum-scale=1" />
-    <script src="https://unpkg.com/webrtc-adapter@7.7.0/out/adapter.js"></script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <title>Camera</title>
     <style>
-      #camera {
-        display: block;
-        margin: auto;
-        max-width: 100%;
+      body {
+        margin: 0;
+        padding: 0;
       }
-      #roll {
-        display: flex;
-        flex-direction: row-reverse;
-        padding-left: 0;
-        list-style: none;
+      .container {
+        max-width: min(100vw, 1024px);
+        margin: 0 auto;
+        padding: 0;
       }
-      #roll li {
-        flex: 1 1 auto;
+      .video-container {
+        position: relative;
+        margin-bottom: 20px;
       }
-      #roll img {
-        display: block;
-        max-width: 100%;
-        height: auto;
+      #video {
+        width: 100vw;
+        object-fit: contain;
+        background-color: #f0f0f0;
       }
-      #selector {
-        width: 100%;
-        font-size: large;
+      .controls {
+        margin-top: 20px;
       }
-      .hidden {
+      .error {
+        color: red;
+        margin: 10px 0;
+        padding: 10px;
+        background-color: #ffebee;
+        border-radius: 4px;
         display: none;
+      }
+      select {
+        padding: 8px 16px;
+        margin: 5px;
+        border-radius: 4px;
+      }
+      #deviceSelect {
+        min-width: 200px;
       }
     </style>
   </head>
   <body>
-    <div>
-      <div>
-        <video id="camera" autoplay="autoplay"></video>
-        <select id="selector" class="hidden"></select>
-        <ul id="roll"></ul>
+    <div class="container">
+      <div class="video-container">
+        <video id="video" autoplay playsinline muted></video>
       </div>
-
-      <div class="hidden">
-        <canvas id="canvas"></canvas>
-        <a id="anchor" target="_blank"></a>
+      <div class="error" id="error"></div>
+      <div class="controls">
+        <select id="deviceSelect"></select>
       </div>
     </div>
+
     <script>
-      document.addEventListener("DOMContentLoaded", () => {
-        const video = document.getElementById("camera");
-        const canvas = document.getElementById("canvas");
-        const anchor = document.getElementById("anchor");
-        const roll = document.getElementById("roll");
-        const selector = document.getElementById("selector");
-        const dataURLs = [];
+      const video = document.getElementById("video");
+      const error = document.getElementById("error");
+      const deviceSelect = document.getElementById("deviceSelect");
+      let stream = null;
+      let imageCapture = null;
+      let photoSettings = null;
 
-        function removeChildren(node) {
-          while (node.firstChild) {
-            node.removeChild(node.firstChild);
-          }
-        }
+      function showError(message) {
+        error.textContent = message;
+        error.style.display = "block";
+      }
 
-        function download(dataURL) {
-          anchor.href = dataURL;
-          anchor.download = `${Date.now()}.jpg`;
-          anchor.click();
-        }
+      function hideError() {
+        error.style.display = "none";
+      }
 
-        function append(dataURL) {
-          dataURLs.push(dataURL);
-          if (dataURLs.length > 5) {
-            dataURLs.shift();
-          }
-          refresh();
-        }
+      function updateCapabilities() {
+        if (!imageCapture) return;
 
-        function refresh() {
-          removeChildren(roll);
-
-          dataURLs
-            .map((dataURL) => {
-              const li = document.createElement("li");
-              const img = document.createElement("img");
-              img.src = dataURL;
-              li.appendChild(img);
-              li.addEventListener("click", (evt) => {
-                evt.preventDefault();
-                download(dataURL);
-              });
-              return li;
-            })
-            .forEach((li) => {
-              roll.appendChild(li);
-            });
-        }
-
-        function destroy(mediaStream) {
-          if (mediaStream) {
-            for (const track of mediaStream.getTracks()) {
-              track.stop();
+        imageCapture.getPhotoCapabilities().then((capabilities) => {
+          if (capabilities) {
+            // 設定を保存
+            photoSettings = {};
+            if (capabilities.imageWidth?.max) {
+              photoSettings.imageWidth = capabilities.imageWidth.max;
+            }
+            if (capabilities.imageHeight?.max) {
+              photoSettings.imageHeight = capabilities.imageHeight.max;
+            }
+            if (
+              capabilities.redEyeReduction == "always" ||
+              capabilities.redEyeReduction == "controllable"
+            ) {
+              photoSettings.redEyeReduction = true;
+            }
+            if (
+              capabilities.fillLightMode &&
+              capabilities.fillLightMode.find((mode) => mode == "off")
+            ) {
+              photoSettings.fillLightMode = "off";
             }
           }
+        });
+      }
+
+      async function updateDeviceList() {
+        try {
+          const tempStream = await navigator.mediaDevices.getUserMedia({
+            video: true,
+          });
+          tempStream.getTracks().forEach((track) => track.stop());
+
+          const devices = await navigator.mediaDevices.enumerateDevices();
+          const videoDevices = devices.filter(
+            (device) => device.kind === "videoinput",
+          );
+
+          deviceSelect.innerHTML = "";
+          deviceSelect.value = "";
+          hideError();
+
+          if (!videoDevices.length) {
+            return;
+          }
+
+          videoDevices.forEach((device) => {
+            const option = document.createElement("option");
+            option.value = device.deviceId;
+            option.text =
+              device.label || `カメラ ${videoDevices.indexOf(device) + 1}`;
+            deviceSelect.appendChild(option);
+          });
+
+          videoDevices.forEach((device) => {
+            if (device.label && device.label.includes("back")) {
+              deviceSelect.value = device.deviceId;
+            }
+          });
+          if (!deviceSelect.value) {
+            deviceSelect.value = videoDevices[0].deviceId;
+          }
+
+          startCamera();
+        } catch (err) {
+          showError("カメラデバイスの列挙に失敗しました: " + err.message);
+        }
+      }
+
+      async function startCamera() {
+        if (stream) {
+          stopCamera();
         }
 
-        function enumerateDevices() {
-          navigator.mediaDevices
-            .enumerateDevices()
-            .then((devices) => {
-              removeChildren(selector);
+        try {
+          const constraints = {
+            video: {
+              deviceId: deviceSelect.value
+                ? { exact: deviceSelect.value }
+                : undefined,
+            },
+          };
 
-              devices
-                .filter((device) => {
-                  return device.kind === "videoinput";
-                })
-                .forEach((device) => {
-                  const option = document.createElement("option");
-                  option.value = device.deviceId;
-                  option.text = device.label;
-                  selector.appendChild(option);
-                });
+          stream = await navigator.mediaDevices.getUserMedia(constraints);
+          video.srcObject = stream;
 
-              if (selector.firstChild) {
-                selector.firstChild.selected = true;
-                selector.dispatchEvent(new Event("change"));
-              } else {
-                destroy();
-              }
+          // ImageCapture オブジェクトの作成
+          const track = stream.getVideoTracks()[0];
+          imageCapture = new ImageCapture(track);
 
-              if (selector.children.length > 1) {
-                selector.classList.remove("hidden");
-              } else {
-                selector.classList.add("hidden");
-              }
-            })
-            .catch((error) => console.error(error));
+          // カメラ性能の更新
+          updateCapabilities();
+
+          hideError();
+        } catch (err) {
+          showError("カメラの開始に失敗しました: " + err.message);
         }
+      }
 
-        video.addEventListener("click", (evt) => {
-          evt.preventDefault();
-          const videoWidth = video.videoWidth;
-          const videoHeight = video.videoHeight;
-          canvas.width = videoWidth;
-          canvas.height = videoHeight;
-          canvas.getContext("2d").drawImage(video, 0, 0, videoWidth, videoHeight, 0, 0, videoWidth, videoHeight);
-          append(canvas.toDataURL("image/jpeg"));
-        });
-
-        video.addEventListener("load", (evt) => {
-          video.play();
-        });
-
-        selector.addEventListener("change", (evt) => {
-          destroy(video.srcObject);
+      function stopCamera() {
+        if (stream) {
+          stream.getTracks().forEach((track) => track.stop());
           video.srcObject = null;
-          const constraints = { video: { deviceId: { exact: selector.value } }, audio: false };
-          navigator.mediaDevices
-            .getUserMedia(constraints)
-            .then((mediaStream) => {
-              video.srcObject = mediaStream;
-            })
-            .catch((error) => console.error(error));
-        });
+          stream = null;
+          imageCapture = null;
+          photoSettings = null;
+        }
+      }
 
-        navigator.mediaDevices.addEventListener("devicechange", enumerateDevices);
-        enumerateDevices();
-      });
+      function takePhoto() {
+        if (!imageCapture) return;
+
+        const filename = `photo-${new Date().toISOString()}.jpg`;
+        let photoOptions = undefined;
+
+        if (photoSettings) {
+          photoOptions = {
+            imageWidth: photoSettings.imageWidth,
+            imageHeight: photoSettings.imageHeight,
+            fillLightMode: photoSettings.fillLightMode,
+            redEyeReduction: photoSettings.redEyeReduction,
+          };
+        }
+
+        imageCapture
+          .takePhoto(photoOptions)
+          .then(blob => URL.createObjectURL(blob))
+          .then(url => {
+            const link = document.createElement("a");
+            link.download = filename;
+            link.href = url;
+            link.click()
+            return url
+          }).then(url => URL.revokeObjectURL(url))
+          .catch((err) => {
+            console.error("Photo options:", photoSettings);
+            showError("写真の撮影に失敗しました: " + err.message);
+          });
+      }
+
+      video.addEventListener("click", takePhoto);
+      deviceSelect.addEventListener("change", startCamera);
+      navigator.mediaDevices.addEventListener("devicechange", updateDeviceList);
+      updateDeviceList();
     </script>
   </body>
 </html>
