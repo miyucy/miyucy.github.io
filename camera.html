@@ -60,6 +60,7 @@
         object-fit: cover;
       }
       #resetGallery {
+        width: 100%;
       }
     </style>
   </head>
@@ -266,7 +267,6 @@
               addGalleryItem(filename);
             })
             .catch((err) => {
-              console.error("Photo options:", photoSettings);
               showError("写真の撮影に失敗しました: " + err.message);
             });
         }
@@ -339,7 +339,8 @@
       video.addEventListener("click", takePhoto);
       deviceSelect.addEventListener("change", startCamera);
       navigator.mediaDevices.addEventListener("devicechange", updateDeviceList);
-      resetGallery.addEventListener("click", removeAllGalleryItem)
+      resetGallery.addEventListener("click", removeAllGalleryItem);
+      error.addEventListener("click", hideError);
       updateDeviceList();
     </script>
   </body>
